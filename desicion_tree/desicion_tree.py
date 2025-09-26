@@ -1,5 +1,6 @@
 import numpy as np
 
+
 class DecisionTreeClassifier:
     """
     A decision tree classifier implemented from scratch.
@@ -8,21 +9,31 @@ class DecisionTreeClassifier:
         min_samples_split (int): The minimum number of samples required to split an internal node.
         max_depth (int): The maximum depth of the tree.
     """
+
     class Node:
         """
         Helper class representing a single node in the decision tree.
         A node is either a decision node (internal) or a leaf node (terminal).
         """
-        def __init__(self, feature_index=None, threshold=None, left=None, right=None, info_gain=None, value=None):
+
+        def __init__(
+            self,
+            feature_index=None,
+            threshold=None,
+            left=None,
+            right=None,
+            info_gain=None,
+            value=None,
+        ):
             # --- For a Decision Node ---
             self.feature_index = feature_index  # Index of the feature to split on.
-            self.threshold = threshold          # Threshold value for the split.
-            self.left = left                    # Left child node.
-            self.right = right                  # Right child node.
-            self.info_gain = info_gain          # Information gain achieved by this split.
-            
+            self.threshold = threshold  # Threshold value for the split.
+            self.left = left  # Left child node.
+            self.right = right  # Right child node.
+            self.info_gain = info_gain  # Information gain achieved by this split.
+
             # --- For a Leaf Node ---
-            self.value = value                  # The predicted class label.
+            self.value = value  # The predicted class label.
 
         def is_leaf_node(self):
             """Checks if the node is a leaf node."""
@@ -31,7 +42,7 @@ class DecisionTreeClassifier:
     def __init__(self, min_samples_split=2, max_depth=100):
         # The root node of the decision tree.
         self.root = None
-        
+
         # Stopping conditions for the tree building process.
         self.min_samples_split = min_samples_split
         self.max_depth = max_depth
@@ -44,16 +55,18 @@ class DecisionTreeClassifier:
         # If no tree is specified, start from the root of the instance's tree.
         if tree is None:
             tree = self.root
-        
+
         # Base case: If the node is a leaf, print its value.
         if tree.value is not None:
             print(tree.value)
             return
-            
+
         # Recursive step: Print the split condition and then traverse children.
         else:
             # Print the current node's split rule and information gain.
-            print(f"X_{tree.feature_index} <= {tree.threshold:.2f} ? (Gain: {tree.info_gain:.4f})")
+            print(
+                f"X_{tree.feature_index} <= {tree.threshold:.2f} ? (Gain: {tree.info_gain:.4f})"
+            )
 
             # Print the left subtree.
             print(f"{indent}├─ Left: ", end="")
@@ -74,7 +87,7 @@ class DecisionTreeClassifier:
         # Ensure y is a 2D column vector for concatenation.
         if len(y.shape) == 1:
             y = y.reshape(-1, 1)
-            
+
         dataset = np.concatenate((X, y), axis=1)
         # Start the recursive tree building process.
         self.root = self._build_tree(dataset, impurity_calculation)
@@ -94,8 +107,8 @@ class DecisionTreeClassifier:
         return predictions
 
     # --- Private Helper Methods ---
-    
-    def _build_tree(self, dataset, impurity_calculation, current_depth=0 ):
+
+    def _build_tree(self, dataset, impurity_calculation, current_depth=0):
         """
         Recursively builds the decision tree in a greedy fashion.
 
@@ -118,10 +131,11 @@ class DecisionTreeClassifier:
         # --- Base Case: Check for stopping conditions ---
         # 1. If min_samples or max_depth is reached.
         # 2. If all samples in the node belong to one class (node is pure).
-        if (num_samples < self.min_samples_split or
-            current_depth >= self.max_depth or
-            len(np.unique(y)) == 1):
-            
+        if (
+            num_samples < self.min_samples_split
+            or current_depth >= self.max_depth
+            or len(np.unique(y)) == 1
+        ):
             leaf_value = self._calculate_leaf_value(y)
             return DecisionTreeClassifier.Node(value=leaf_value)
 
@@ -140,24 +154,25 @@ class DecisionTreeClassifier:
             )
 
             # Return a decision node that links to the subtrees.
-            return DecisionTreeClassifier.Node(feature_index=best_split["feature_index"],
-                        threshold=best_split["threshold"],
-                        left=left_subtree,
-                        right=right_subtree,
-                        info_gain=best_split["info_gain"])
+            return DecisionTreeClassifier.Node(
+                feature_index=best_split["feature_index"],
+                threshold=best_split["threshold"],
+                left=left_subtree,
+                right=right_subtree,
+                info_gain=best_split["info_gain"],
+            )
 
         else:
-            # Base Case: No split provided improvement 
+            # Base Case: No split provided improvement
             # If no split could increase purity, create a leaf node.
             leaf_value = self._calculate_leaf_value(y)
             return DecisionTreeClassifier.Node(value=leaf_value)
-    
 
     def _get_best_split(self, dataset, impurity_calculation):
         """
         gets the best split that maximizes the information gain and thus reducing the entropy of the dataset
 
-        parameters: 
+        parameters:
         returns:
             a dictionary containing the dataset split into left and right.
             note: dictionary also includes the index of the feature used to split the data and the information gain
@@ -179,17 +194,21 @@ class DecisionTreeClassifier:
             possible_threshold = np.unique(feature_values)
             for threshold in possible_threshold:
                 # get current split
-                dataset_left, dataset_right = self._split(dataset, feature_index, threshold)
+                dataset_left, dataset_right = self._split(
+                    dataset, feature_index, threshold
+                )
 
                 # check if children are not null
-                if ((len(dataset_left) > 0) and (len(dataset_right) > 0) ):
+                if (len(dataset_left) > 0) and (len(dataset_right) > 0):
                     left_y, right_y = dataset_left[:, -1], dataset_right[:, -1]
 
                     # compute information gain
-                    information_gain = self._information_gain(y, left_y, right_y, impurity_calculation)
+                    information_gain = self._information_gain(
+                        y, left_y, right_y, impurity_calculation
+                    )
 
                     # update the currentsplit gains more information than the previos best
-                    if (information_gain > max_info_gain):
+                    if information_gain > max_info_gain:
                         best_split["feature_index"] = feature_index
                         best_split["threshold"] = threshold
                         best_split["dataset_left"] = dataset_left
@@ -199,7 +218,7 @@ class DecisionTreeClassifier:
                         max_info_gain = information_gain
 
         return best_split
-    
+
     def _split(self, dataset, feature_index, threshold):
         """
         Splits a dataset into two subsets based on a threshold and feature.
@@ -215,15 +234,15 @@ class DecisionTreeClassifier:
         """
         # Create a boolean mask by applying the condition to the entire feature column at once.
         left_mask = dataset[:, feature_index] <= threshold
-        
+
         # The right dataset is everything that doesn't match the left mask.
         # The '~' operator inverts the boolean mask.
         right_mask = ~left_mask
-        
+
         # Use the boolean masks to select the rows for each subset.
         left_dataset = dataset[left_mask]
         right_dataset = dataset[right_mask]
-        
+
         return left_dataset, right_dataset
 
     def _information_gain(self, parent, left_child, right_child, mode="entropy"):
@@ -257,9 +276,11 @@ class DecisionTreeClassifier:
             right_impurity = self._entropy(right_child)
 
         # Formula: Gain = Parent Impurity - (Weight_Left * Impurity_Left + Weight_Right * Impurity_Right)
-        weighted_child_impurity = (weight_left * left_impurity) + (weight_right * right_impurity)
+        weighted_child_impurity = (weight_left * left_impurity) + (
+            weight_right * right_impurity
+        )
         information_gain = parent_impurity - weighted_child_impurity
-        
+
         return information_gain
 
     # --- Impurity Measures ---
@@ -278,10 +299,10 @@ class DecisionTreeClassifier:
         _, counts = np.unique(y, return_counts=True)
         # Calculate the probability of each class.
         probabilities = counts / len(y)
-        
+
         # Calculate and sum the entropy for each class.
         entropy = -np.sum([p * np.log2(p) for p in probabilities if p > 0])
-        
+
         return entropy
 
     def _gini_impurity(self, y):
@@ -294,18 +315,17 @@ class DecisionTreeClassifier:
         """
         if len(y) == 0:
             return 0  # Gini impurity of an empty set is 0.
-            
+
         # Count occurrences of each class label.
         _, counts = np.unique(y, return_counts=True)
         # Calculate the probability of each class.
         probabilities = counts / len(y)
-        
+
         # The Gini impurity is 1 minus the sum of squared probabilities.
         gini = 1 - np.sum(probabilities**2)
-        
+
         return gini
-    
-        
+
     def _calculate_leaf_value(self, y):
         """
         Determines the value for a leaf node by finding the most frequent label.
@@ -322,7 +342,7 @@ class DecisionTreeClassifier:
             frequency_map[element] = frequency_map.get(element, 0) + 1
 
         most_frequent_label = max(frequency_map, key=frequency_map.get)
-        
+
         return most_frequent_label
 
     def _make_prediction(self, x, tree):
@@ -342,7 +362,7 @@ class DecisionTreeClassifier:
 
         # Recursive step: Decide whether to go left or right.
         feature_value = x[tree.feature_index]
-        
+
         if feature_value <= tree.threshold:
             # Traverse the left subtree.
             return self._make_prediction(x, tree.left)

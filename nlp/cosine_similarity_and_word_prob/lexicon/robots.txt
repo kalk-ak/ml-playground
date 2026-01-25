@@ -1,0 +1,18 @@
+User-agent: ia_archiver
+Disallow: /~ateniese/
+Disallow: /~ateniese
+Disallow: /~jason/tmp
+
+User-agent: *
+Disallow: /news-events/calendar/action~posterboard/
+Disallow: /news-events/calendar/action~agenda/
+Disallow: /news-events/calendar/action~oneday/
+Disallow: /news-events/calendar/action~month/
+Disallow: /news-events/calendar/action~week/
+Disallow: /news-events/calendar/action~stream/
+Disallow: /calendar/action~posterboard/
+Disallow: /calendar/action~agenda/
+Disallow: /calendar/action~oneday/
+Disallow: /calendar/action~month/
+Disallow: /calendar/action~week/
+Disallow: /calendar/action~stream/

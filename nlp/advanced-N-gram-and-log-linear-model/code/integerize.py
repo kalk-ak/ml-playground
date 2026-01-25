@@ -1,33 +1,4 @@
 #!/usr/bin/env python3
-# CS765 and CS465 at Johns Hopkins University. Module for integerizing Python objects.
-
-# Author: Jason Eisner <jason@cs.jhu.edu>, Spring 2018, Fall 2020, Fall 2021
-
-# The Integerizer class makes it easy to map between hashable objects and
-# integers.  The objects are assigned consecutive integers starting at 0.
-#
-# For example, it is sometimes helpful to associate each word type in a
-# vocabulary with an unique integer.  This integer index can then be
-# used to help look up counts or parameters associated with that word
-# type.
-#
-# This is sometimes more convenient than using the word type's string
-# representation as a dictionary key, particularly when working with
-# libraries like NumPy, PyTorch, and OpenFST whose collection objects
-# can be indexed only by integer keys.
-#
-# Integers are tiny to store, fast to compare, and able to index
-# lists, vectors, and tensors.  Strings are not.  Therefore, NLP code
-# often converts strings to integers upon input, works with integers
-# internally, and converts back to strings just before printing
-# output.
-#
-# Integerization is useful not only for strings, but also for feature
-# names.  In a log-linear model, a feature should be named by some
-# object -- for example, an n-gram feature might be named by an
-# n-tuple of strings.  If 7 is the integerized version of that feature
-# name, then the feature's weight could be stored at theta[7], where
-# theta is the parameter vector in NumPy.
 
 from typing import (
     Dict,

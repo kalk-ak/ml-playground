@@ -1,16 +1,3 @@
-"""
-SGD_convergent.py
-
-Implements stochastic gradient descent with a diminishing
-learning rate, to guarantee convergence to the global optimum
-on convex functions. We follow Bottou (2012), "Stochastic
-gradient descent tricks"
-<www.microsoft.com/en-us/research/publication/stochastic-gradient-tricks/>
-
-Mostly a simplified form of PyTorch's torch.optim.SGD
-
-Author: Arya D. McCarthy <arya@jhu.edu> 2020-10-11
-"""
 from typing import Final, Iterable
 
 import torch
@@ -18,7 +5,7 @@ from torch.optim.optimizer import Optimizer  # type: ignore[import]
 
 
 class ConvergentSGD(Optimizer):
-    """Minimize a function by stepping down the gradient """
+    """Minimize a function by stepping down the gradient"""
 
     def __init__(self, params: Iterable[torch.Tensor], eta0: float, lambda_: float):
         # Validate inputs.
@@ -29,9 +16,9 @@ class ConvergentSGD(Optimizer):
 
         super().__init__(params, {})
         self.eta0: Final[float] = eta0  # Initial learning rate (from Algorithm 1)
-        self.lambda_: Final[
-            float
-        ] = lambda_  # Shriking the LR coefficient (from Algorithm 1)
+        self.lambda_: Final[float] = (
+            lambda_  # Shriking the LR coefficient (from Algorithm 1)
+        )
         self.t: int = 0  # Current time step (from Algorithm 1)
 
     @property
@@ -58,7 +45,9 @@ class ConvergentSGD(Optimizer):
 
 
 def test_me():
-    model = torch.nn.Linear(2, 3)  # Generic, simple model with few parameters: f(x) = Ax+b
+    model = torch.nn.Linear(
+        2, 3
+    )  # Generic, simple model with few parameters: f(x) = Ax+b
     x = torch.randn(2)  # Generic, simple input: random numbers.
     optimizer = ConvergentSGD(
         model.parameters(), eta0=0.5, lambda_=20

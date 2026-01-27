@@ -15,11 +15,11 @@ class ConvergentSGD(Optimizer):
             raise ValueError(f"Invalid learning rate shrinkage constant: {lambda_}")
 
         super().__init__(params, {})
-        self.eta0: Final[float] = eta0  # Initial learning rate (from Algorithm 1)
+        self.eta0: Final[float] = eta0  # Initial learning rate 
         self.lambda_: Final[float] = (
             lambda_  # Shriking the LR coefficient (from Algorithm 1)
         )
-        self.t: int = 0  # Current time step (from Algorithm 1)
+        self.t: int = 0  # Current time step
 
     @property
     def eta(self) -> float:

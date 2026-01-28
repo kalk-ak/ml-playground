@@ -1,0 +1,166 @@
+# Symbols in the grammar are case-sensitive.
+# 
+# This grammar uses a convention that
+#    - terminals are usually lowercase  (president)
+#    - preterminals are capitalized     (Noun)
+#    - other nonterminals are all-caps  (NP)
+# 
+# This convention just makes grammars more readable to humans.  Thus:
+#
+#    - When *you* are writing grammars in questions 3 and 6, you should 
+#      follow this convention unless you have a good reason not to.  
+#
+#    - But your *program* should still work with grammars that don't
+#      follow this convention.  So how can your program reliably tell
+#      the difference between terminal and nonterminal symbols?  If
+#      there is at least one rule for rewriting a symbol, then that
+#      symbol is a nonterminal and should be rewritten.
+#######################
+
+3	ROOT	S .                # In a natural language most sentences end with a period.
+1	ROOT	S !
+1	ROOT	is it true Rel_Pronoun S ?	# Changed that into a relative pronoun
+2	ROOT	I wonder Emb_Questions .		# Embedded questions starting with "I wonder"
+
+# Rules for a Sentence.
+1	S	NP VP
+0.1	S	NP Cognitive_Verb Rel_Pronoun S
+0.1	S	it PSYCH_VP Rel_Pronoun S
+0.1	S	Rel_Pronoun S PSYCH_VP
+
+# Rules for a Verb Phrase.
+2	VP	Verb NP
+2	VP	V_intrans
+0.3	VP	VP Conj VP							# Conjunctions lead to exponentially many parses, so give it a low weight
+0.3	PSYCH_VP	Psych_Verb NP
+0.3	PSYCH_VP	PSYCH_VP Conj PSYCH_VP  # to mimic the `1	VP	VP Conj VP`.
+
+# Rules for a Noun Phrase
+5	NP	Normal_NP
+3	NP	Unrestrictable_NP   # LONG JUSTIFICATION COMMENT: I say unrestrictable because a preposition followed by a NP is something that restricts multiple possibilities into one possibility. However, "it" by definition already is one specific thing, so it doesn't make grammatical sense to further restrict it by saying something like "it on the floor ran" even though something restrictable like "the dog" would work ("the dog on the floor ran")
+# Above is 2 categories of Noun phrase, below are the specific NP implementations
+# the above weights are chosen in such a way that NP is still essentially divided by the below weights,
+# and should be kept that way to avoid confusion.
+5	Normal_NP	Det Noun                    # given higher weight to shorten the sentences
+0.5	Normal_NP	Normal_NP PP
+0.5	Normal_NP	NP Conj Normal_NP
+3	Unrestrictable_NP	P_noun
+
+# Rule for a Prepositional Phrase
+1	PP	Prep NP
+
+# Rules for Modifying Nouns and Adjectives.
+2	Noun	Adj Noun
+5	Adj	Ad_verb Adj            # Allows adverbs to modify adjectives recursively
+
+# Verbs are divided into Psych and NonPsych, but should still be distributed equally,
+# so weights for Psych vs NonPsych are just directly the sum of the weights of words they represent
+5	NonPsych_Verb	ate
+5	NonPsych_Verb	wanted
+1	NonPsych_Verb	kissed
+1	NonPsych_Verb	understood
+1	NonPsych_Verb	pickled
+1	NonPsych_Verb	worked on
+5	NonPsych_Verb	thought
+# make sure to keep track of a sum of the above ones!!!! Currently: 18
+18	Verb	NonPsych_Verb
+3	Verb	Psych_Verb
+
+# we can also stack verbs as such:
+3	Verb	Verb Conj Verb
+
+# Psych verbs — make sure sum of below is equally to the number directly above! currently: 3
+1	Psych_Verb	perplexed
+1	Psych_Verb	flabbergasted
+1	Psych_Verb	petrified
+
+
+1	S_missing_obj_NP	NP Verb  # A VP missing its required object is just a Verb
+0.2	S_missing_obj_NP	NP Cognitive_Verb Rel_Pronoun S_missing_obj_NP
+
+1	S_missing_prep_obj	NP VP Prep
+
+# For WH-Questions 	for part (b)
+1	Emb_Questions	Wh_Pronoun VP
+1	Emb_Questions	Wh_Pronoun S_missing_obj_NP
+1	Emb_Questions	Wh_Pronoun S_missing_prep_obj
+1	Emb_Questions	Wh_Adverb  S
+
+
+# For Relative Clauses (c)
+1	NP	NP Rel_Clause					# A noun phrase can be followed by a relative clause
+1	Rel_Clause	Rel_Pronoun VP
+1	Rel_Clause	Rel_Pronoun S_missing_obj_NP
+
+# Transitive Verbs (above) take a direct object
+# Intransitive Verbs (below) do not take a direct object
+1	V_intrans	sighed
+
+# this is really a separate category, as it can't be used in similar ways as the above ones
+1	Cognitive_Verb	thought
+
+# Determiners
+1	Det	the
+1	Det	a
+1	Det	every
+
+# Nouns
+5	Noun	president
+5	Noun	sandwich
+1	Noun	pickle
+0.5	Noun	chief of staff   # decrease chief of staff because it's weird
+1	Noun	floor
+5	Noun	desk
+5	Noun	proposal
+
+# Adjectives
+1	Adj	fine
+1	Adj	delicious
+5	Adj	perplexed
+1	Adj	pickled
+
+# Prepositions
+1	Prep	with
+1	Prep	on
+1	Prep	under
+1	Prep	in
+
+# Conjunctions
+1	Conj	and				# There is only one conjunction in the example sentences, so only one is needed here
+
+
+# WH Questions and Relative Clauses
+1	Wh_Pronoun	who
+1	Wh_Pronoun	what
+1	Wh_Adverb	where 		# Where is defined as an adverb here because it modifies the verb in the embedded question "where is it"
+
+1	Rel_Pronoun	that		# that is defined as a pronoun here because it replaces the noun in the relative clause "the sandwich that I ate"
+
+
+# Extra credit change
+# For the extra credit, we decided to do the Appositives from question number 4.
+
+# main Rule is that we Attach the appositive only to a Normal_NP.
+# Probabilities is set to 0.1 so that the sentences don't get too long.
+0.2	Normal_NP	Normal_NP , APPOS , 
+
+# An appositive can be a descriptive noun phrase
+#    or a special phrase like an age.
+1	APPOS	Normal_NP
+0.3	APPOS	59 years old
+
+# An appositive can be a descriptive noun phrase
+#    or a special phrase like an age.
+1	APPOS	Det NP
+0.3	APPOS	59 years old
+
+
+
+
+
+# Pronouns / Proper nouns
+4	P_noun	it
+1	P_noun	Sally
+
+# Adverbs
+1	Ad_verb	very

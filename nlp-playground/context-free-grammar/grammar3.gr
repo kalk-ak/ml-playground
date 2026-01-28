@@ -1,0 +1,117 @@
+# Symbols in the grammar are case-sensitive.
+# 
+# This grammar uses a convention that
+#    - terminals are usually lowercase  (president)
+#    - preterminals are capitalized     (Noun)
+#    - other nonterminals are all-caps  (NP)
+# 
+# This convention just makes grammars more readable to humans.  Thus:
+#
+#    - When *you* are writing grammars in questions 3 and 6, you should 
+#      follow this convention unless you have a good reason not to.  
+#
+#    - But your *program* should still work with grammars that don't
+#      follow this convention.  So how can your program reliably tell
+#      the difference between terminal and nonterminal symbols?  If
+#      there is at least one rule for rewriting a symbol, then that
+#      symbol is a nonterminal and should be rewritten.
+#######################
+
+3	ROOT	S .                # In a natural language most sentences end with a period.
+1	ROOT	S !
+1	ROOT	is it true that S ?
+
+# Rules for a Sentence.
+1	S	NP VP
+0.1	S	NP Cognitive_Verb that S
+0.1	S	it PSYCH_VP that S
+0.1	S	that S PSYCH_VP
+
+# Rules for a Verb Phrase.
+2	VP	Verb NP
+2	VP	V_intrans
+0.3	VP	VP Conj VP							# Conjunctions lead to exponentially many parses, so give it a low weight
+0.3	PSYCH_VP	Psych_Verb NP
+0.3	PSYCH_VP	PSYCH_VP Conj PSYCH_VP  # to mimic the `1	VP	VP Conj VP`.
+
+# Rules for a Noun Phrase
+5	NP	Normal_NP
+3	NP	Unrestrictable_NP   # LONG JUSTIFICATION COMMENT: I say unrestrictable because a preposition followed by a NP is something that restricts multiple possibilities into one possibility. However, "it" by definition already is one specific thing, so it doesn't make grammatical sense to further restrict it by saying something like "it on the floor ran" even though something restrictable like "the dog" would work ("the dog on the floor ran")
+# Above is 2 categories of Noun phrase, below are the specific NP implementations
+# the above weights are chosen in such a way that NP is still essentially divided by the below weights,
+# and should be kept that way to avoid confusion.
+3	Normal_NP	Det Noun                    # given higher weight to shorten the sentences
+0.5	Normal_NP	Normal_NP PP
+0.5	Normal_NP	NP Conj Normal_NP
+3	Unrestrictable_NP	P_noun
+
+# Rule for a Prepositional Phrase
+1	PP	Prep NP
+
+# Rules for Modifying Nouns and Adjectives.
+2	Noun	Adj Noun
+5	Adj	Ad_verb Adj            # Allows adverbs to modify adjectives recursively
+
+# Verbs are divided into Psych and NonPsych, but should still be distributed equally,
+# so weights for Psych vs NonPsych are just directly the sum of the weights of words they represent
+5	NonPsych_Verb	ate
+5	NonPsych_Verb	wanted
+1	NonPsych_Verb	kissed
+1	NonPsych_Verb	understood
+1	NonPsych_Verb	pickled
+1	NonPsych_Verb	worked on
+# make sure to keep track of a sum of the above ones!!!! Currently: 18
+18	Verb	NonPsych_Verb
+3	Verb	Psych_Verb
+
+# we can also stack verbs as such:
+3	Verb	Verb Conj Verb
+
+# Psych verbs — make sure sum of below is equally to the number directly above! currently: 3
+1	Psych_Verb	perplexed
+1	Psych_Verb	flabbergasted
+1	Psych_Verb	petrified
+
+
+# Transitive Verbs (above) take a direct object
+# Intransitive Verbs (below) do not take a direct object
+1	V_intrans	sighed
+
+# this is really a separate category, as it can't be used in similar ways as the above ones
+1	Cognitive_Verb	thought
+
+# Determiners
+1	Det	the
+1	Det	a
+1	Det	every
+
+# Nouns
+5	Noun	president
+5	Noun	sandwich
+1	Noun	pickle
+0.5	Noun	chief of staff   # decrease chief of staff because it's weird
+1	Noun	floor
+5	Noun	desk
+5	Noun	proposal
+
+# Adjectives
+1	Adj	fine
+1	Adj	delicious
+5	Adj	perplexed
+1	Adj	pickled
+
+# Prepositions
+1	Prep	with
+1	Prep	on
+1	Prep	under
+1	Prep	in
+
+# Conjunctions
+1	Conj	and				# There is only one conjunction in the example sentences, so only one is needed here
+
+# Pronouns / Proper nouns
+4	P_noun	it
+1	P_noun	Sally
+
+# Adverbs
+1	Ad_verb	very
